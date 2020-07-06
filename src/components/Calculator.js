@@ -10,17 +10,16 @@ class Calculator extends React.Component {
             input1: undefined,
             input2: undefined,
             result: undefined,
+            isInput1Float: undefined
         }
     }
     setOperator = value => {
         this.setState({
-            operator: value
-        });
-        this.setState({
+            operator: value,
             input1: Number(this.state.input1)
         });
+        
         this.displayInput(this.state.input1);
-        console.log(this.state.input1, this.state.operator);
     }
     setInput = value => {
         if (this.state.input1 === undefined) {
@@ -54,6 +53,33 @@ class Calculator extends React.Component {
             result: value
         })
     }
+    clearDisplay = () => {
+        this.reset();
+        this.setState({
+            input1: undefined,
+            isInput1Float: false,
+        });
+        document.querySelector('.display').innerHTML = 0;
+    }
+    reset = () => {
+        this.setState({
+            input2: undefined,
+            operator: undefined,
+            isInput2Float: false,
+        });
+    }
+    
+    add = (a, b) => {
+        if (this.state.isInput1Float === true || this.state.isInput2Float === true) {
+            this.setState({
+                result: (Number(a) + Number(b)).toFixed(5)
+            })
+        } else {
+            this.setState({
+                result: Number(a) + Number(b)
+            })
+        }
+    };
     
 
     // something to display
@@ -65,9 +91,9 @@ class Calculator extends React.Component {
                 </header>
 
                 <div className="calculator">
-                    <section className="display">{this.state.result} *(^-^)*</section>
+                    <section className="display">{ this.state.result ? this.state.result : "*(^-^)*" }</section>
                     <section className="keys">
-                        <button className="controls" id="clear" type="button" onClick="clearDisplay()">AC</button>
+                        <button className="controls" id="clear" type="button" onClick={event => this.clearDisplay()}>AC</button>
 
                         <button className="manipulation" id="percent" onClick="calcPercent()">%</button>
 
