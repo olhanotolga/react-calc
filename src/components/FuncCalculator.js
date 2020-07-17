@@ -1,12 +1,15 @@
 import React from 'react';
 import './Calc.css';
 
-const FuncCalculator = () => {
-    const result = 200;
-    const setOperator = value => {
+const FuncCalculator = (props) => {
+    console.log("props: ", props);
+    
+    // const result = 200;
+    
+    const setOperator = event => {
         console.log('setOperator is called', event.target.value);
     };
-    const setInput = value => {
+    const setInput = event => {
         console.log('setInput is called', event.target.value);
     };
     return (
@@ -16,7 +19,7 @@ const FuncCalculator = () => {
             </header>
 
             <div className="calculator">
-                <section className="display">{result}</section>
+                <section className="display">The result is {props.result}</section>
                 <section className="keys">
                     <button className="controls" id="clear" type="button" onClick={event => this.clearDisplay()}>AC</button>
 

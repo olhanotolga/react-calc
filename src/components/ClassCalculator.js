@@ -8,27 +8,310 @@ class ClassCalculator extends React.Component {
             operator: null,
             input1: null,
             input2: null,
-            result: 100,
-            isInput1Float: null
+            result: null,
+            isInput1Float: null,
+            isInput2Float: null,
+            display: null
         };
     }
 
     setOperator = (event) => {
         console.log('setOperator is called', event.target.value);
+        if (this.state.result) {
+            this.setState({
+                input1: this.state.result,
+                result: null,
+                operator: event.target.value
+            })
+        } else {
+            if (this.state.input2) {
+                this.calculate();
+                this.setState({
+                    input1: this.state.result,
+                    result: null,
+                    operator: event.target.value
+                })
+            } else {
+                this.setState({
+                    input1: Number(this.state.input1),
+                    operator: event.target.value
+                });
+                this.displayInput(this.state.input1)
+            }
+        }
         this.setState({
             operator: event.target.value
         })
-    };
+    }
+
     setInput = (event) => {
-        console.log('setInput is called', event.target.value);
-        const value = event.target.value;
         
-    };
+        const value = event.target.value;
+        console.log('setInput is called', value);
+
+        if (this.state.result !== null) {
+            this.displayInput(value);
+            return this.setState({
+                isInput1Float: false,
+                result: null,
+                input1: value
+            })
+        }
+        if (this.state.input1 === null) {
+            // this.displayInput(value);
+            this.setState({
+                input1: value
+            });
+            this.displayInput(this.state.input1);
+            console.log(this.state.input1, typeof this.state.input1);
+        } else {
+            if(!this.state.operator) {
+                this.setState({
+                    input1: (this.state.input1).concat(value)
+                });
+                if ((this.state.input1)[0] === "0" && (this.state.input1)[1] !== ".") {
+                    this.setState({
+                        input1: (this.state.input1).substr(1)
+                    })
+                }
+                this.displayInput(this.state.input1);
+                console.log(this.state.input1);
+                
+            } else {
+                console.log(this.state.input1)
+                if (!this.state.input2) {
+                    this.displayInput(value);
+                    this.setState({
+                        input2: value
+                    })
+                } else {
+                    this.setState({
+                        input2: (this.state.input2).concat(value)
+                    })
+                    if ((this.state.input2)[0] === "0" && (this.state.input2)[1] !== ".") {
+                        this.setState({
+                            input2: (this.state.input2).substr(1)
+                        })
+                    }
+                    this.displayInput(this.state.input2);
+                    console.log(this.state.input2);
+                }
+            }
+        }
+    }
+
     displayInput = (value) => {
         this.setState({
-            result: value
+            display: value
         })
     }
+
+    clearDisplay = () => {
+        this.reset();
+        this.setState({
+            result: null,
+            isInput1Float: false
+        })
+        this.displayInput(0);
+    }
+
+    reset = () => {
+        this.setState({
+            input1: null,
+            input2: null,
+            operator: null,
+            isInput2Float: false
+        })
+    }
+
+    add = (a, b) => {
+        this.setState({
+            result: Number((Number(a) + Number(b)).toFixed(10))
+        })
+        console.log(this.state.result);
+        // return this.state.result;
+    };
+    
+    subtract = (a, b) => {
+        this.setState({
+            result: Number((Number(a) - Number(b)).toFixed(10))
+        })
+        // return this.state.result;
+    };
+    
+    multiply = (a, b) => {
+        this.setState({
+            result: Number((Number(a) * Number(b)).toFixed(10))
+        })
+        // return this.state.result;
+    };
+    
+    divide = (a, b) => {
+        if (Number(b) === 0) {
+            this.displayInput("don't you ever divide by zero!");
+        } else {
+            this.setState({
+                result: Number((Number(a) / Number(b)).toFixed(10))
+            })
+        }
+        // return this.state.result;
+    };
+
+    calculate = () => {
+        
+        console.log(this.state.input1, typeof this.state.input1, this.state.operator, this.state.input2, typeof this.state.input2, this.state.result, this.state.display);
+
+        switch (this.state.operator) {
+            case 'addition':
+                this.add(this.state.input1, this.state.input2);
+                // this.displayInput(this.state.result);
+                break;
+            case 'subtraction':
+                this.subtract(this.state.input1, this.state.input2);
+                // this.displayInput(this.state.result);
+                break;
+            case 'multiplication':
+                this.multiply(this.state.input1, this.state.input2);
+                // this.displayInput(this.state.result);
+                break;
+            case 'division':
+                this.divide(this.state.input1, this.state.input2);
+                // this.displayInput(this.state.result);
+                break;
+            default:
+                console.log('no operator selected');
+        }
+        this.reset();
+        this.displayInput(this.state.result);
+        console.log(this.state.display);
+    };
+
+    calcPercent = () => {
+        if (this.state.input2) {
+            this.setState({
+                input2: this.state.input2 / 100
+            })
+            if (this.state.input2 < 1) {
+                this.setState({
+                    isInput2Float: true
+                })
+            }
+            this.displayInput(this.state.input2);
+            return this.state.input2;
+        }
+        if (this.state.input1) {
+            this.setState({
+                input1: this.state.input1 / 100
+            })
+            if (this.state.input1 < 1) {
+                this.setState({
+                    isInput1Float: true
+                })
+            }
+            this.displayInput(this.state.input1);
+            return this.state.input1;
+        }
+        if (this.state.result) {
+            this.setState({
+                result: this.state.result / 100
+            })
+            this.displayInput(this.state.result);
+            return this.state.result;
+        }
+    };
+
+    changeSign = () => {
+        if (this.state.result) {
+            this.setState({
+                result: this.state.result * -1
+            })
+            this.displayInput(this.state.result);
+            return this.state.result;
+        }
+        if (this.state.input2) {
+            this.setState({
+                input2: this.state.input2 * -1
+            })
+            this.displayInput(this.state.input2);
+            return this.state.input2;
+        }
+        if (this.state.input1) {
+            if(this.state.operator) {
+                this.setState({
+                    input2: "-"
+                })
+                this.displayInput(this.state.input2);
+            } else if (this.state.input1 === "-") {
+                this.setState({
+                    input1: null
+                })
+                this.displayInput("0");
+                return this.state.input1;
+            } else {
+                this.setState({
+                    input1: this.state.input1 * -1
+                })
+                this.displayInput(this.state.input1);
+                return this.state.input1;
+            }
+        }
+        if (!this.state.input1) {
+            this.setState({
+                input1: "-"
+            })
+            this.displayInput(this.state.input1);
+        }
+    };
+    
+    addFloatingPoint = () => {
+        if (this.state.result) {
+            this.setState({
+                result: null
+            })
+
+        }
+        console.log(`input1: ${this.state.input1}, input2: ${this.state.input2}, result: ${this.state.result}`);
+        if (this.state.input2) {
+            if (this.state.isInput2Float === false) {
+                this.setState({
+                    input2: this.state.input2.toString().concat("."),
+                    isInput2Float: true
+                })
+                this.displayInput(this.state.input2);
+            }
+        } else if (!this.state.input1) {
+            this.setState({
+                input1: "0.",
+                isInput1Float: true
+            })
+            this.displayInput(this.state.input1);
+        } else {
+            if (this.state.operator) {
+                this.setState({
+                    input2: "0.",
+                    isInput2Float: true
+                })
+                this.displayInput(this.state.input2);
+            } else {
+                if (this.state.isInput1Float === false) {
+                    if (this.state.input1 === "-") {
+                        this.setState({
+                            input1: "-0.",
+                        })
+                    } else {
+                        this.setState({
+                            input1: this.state.input1.concat(".")
+                        })
+                    }
+                    this.displayInput(this.state.input1);
+                    this.setState({
+                        isInput1Float: true
+                    })
+                } 
+            }
+        }
+    }
+    
 
     render () {
         return (
@@ -38,11 +321,11 @@ class ClassCalculator extends React.Component {
                 </header>
 
                 <div className="calculator">
-                    <section className="display">{ this.state.result }</section>
+                    <section className="display">{this.state.display ? this.state.display : "*(^-^)*"}</section>
                     <section className="keys">
                         <button className="controls" id="clear" type="button" onClick={event => this.clearDisplay()}>AC</button>
 
-                        <button className="manipulation" id="percent" onClick="calcPercent()">%</button>
+                        <button className="manipulation" id="percent" onClick={this.calcPercent}>%</button>
 
                         <button className="operation" id="divide" value='division' onClick={this.setOperator}>/</button>
                         
@@ -64,13 +347,13 @@ class ClassCalculator extends React.Component {
                         
                         <button className="operation" id="add" onClick={this.setOperator} value='addition'>+</button>
                         
-                        <button className="manipulation" id="plusminus" onClick="changeSign()">+/–</button>
+                        <button className="manipulation" id="plusminus" onClick={this.changeSign}>+/–</button>
                         
                         <button className="digit" type="button" value="0" onClick={this.setInput}>0</button>
                         
-                        <button className="manipulation" id="floatingPoint" onClick="addFloatingPoint()">,</button>
+                        <button className="manipulation" id="floatingPoint" onClick={this.addFloatingPoint}>,</button>
                         
-                        <button className="operation" id="calculate" onClick="calculate()">=</button>
+                        <button className="operation" id="calculate" onClick={this.calculate}>=</button>
                     </section>
                 </div>
             </main>
