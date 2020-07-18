@@ -13,7 +13,7 @@ class ClassCalculator extends React.Component {
             isInput2Float: null,
             display: null
         };
-    }
+    };
 
     setOperator = (event) => {
         console.log('setOperator is called', event.target.value);
@@ -42,7 +42,7 @@ class ClassCalculator extends React.Component {
         this.setState({
             operator: event.target.value
         })
-    }
+    };
 
     setInput = (event) => {
         
@@ -50,6 +50,7 @@ class ClassCalculator extends React.Component {
         console.log('setInput is called', value);
 
         if (this.state.result !== null) {
+            console.log("result is ", this.state.result);
             this.displayInput(value);
             return this.setState({
                 isInput1Float: false,
@@ -58,24 +59,21 @@ class ClassCalculator extends React.Component {
             })
         }
         if (this.state.input1 === null) {
-            // this.displayInput(value);
+            this.displayInput(value);
             this.setState({
                 input1: value
             });
-            this.displayInput(this.state.input1);
+            // this.displayInput(this.state.input1);
             console.log(this.state.input1, typeof this.state.input1);
         } else {
             if(!this.state.operator) {
-                this.setState({
-                    input1: (this.state.input1).concat(value)
-                });
+                this.setState(prev => ({input1: prev.input1.concat(value)}));
+                
                 if ((this.state.input1)[0] === "0" && (this.state.input1)[1] !== ".") {
-                    this.setState({
-                        input1: (this.state.input1).substr(1)
-                    })
+                    this.setState(prev => ({input1: prev.input1.substr(1)}));
                 }
                 this.displayInput(this.state.input1);
-                console.log(this.state.input1);
+                console.log(`input1 concatenated: ${this.state.input1}`);
                 
             } else {
                 console.log(this.state.input1)
@@ -85,26 +83,29 @@ class ClassCalculator extends React.Component {
                         input2: value
                     })
                 } else {
-                    this.setState({
-                        input2: (this.state.input2).concat(value)
-                    })
+                    // this.setState(prev => {
+                    //     if ((this.state.input2)[0] === "0" && (this.state.input2)[1] !== ".") {
+                    //         this.setState({
+                    //             input2: (this.state.input2).substr(1)
+                    //         })
+                    //     } 
+                    // })
+                    this.setState(prev => ({ input2: prev.input2.concat(value) }));
                     if ((this.state.input2)[0] === "0" && (this.state.input2)[1] !== ".") {
-                        this.setState({
-                            input2: (this.state.input2).substr(1)
-                        })
+                        this.setState(prev => ({input2: prev.input2.substr(1)}));
                     }
                     this.displayInput(this.state.input2);
                     console.log(this.state.input2);
                 }
             }
         }
-    }
+    };
 
     displayInput = (value) => {
         this.setState({
             display: value
         })
-    }
+    };
 
     clearDisplay = () => {
         this.reset();
@@ -113,7 +114,7 @@ class ClassCalculator extends React.Component {
             isInput1Float: false
         })
         this.displayInput(0);
-    }
+    };
 
     reset = () => {
         this.setState({
@@ -122,7 +123,7 @@ class ClassCalculator extends React.Component {
             operator: null,
             isInput2Float: false
         })
-    }
+    };
 
     add = (a, b) => {
         this.setState({
@@ -147,19 +148,15 @@ class ClassCalculator extends React.Component {
     };
     
     divide = (a, b) => {
-        if (Number(b) === 0) {
-            this.displayInput("don't you ever divide by zero!");
-        } else {
-            this.setState({
-                result: Number((Number(a) / Number(b)).toFixed(10))
-            })
-        }
+        this.setState({
+            result: Number((Number(a) / Number(b)).toFixed(10))
+        })
         // return this.state.result;
     };
 
     calculate = () => {
         
-        console.log(this.state.input1, typeof this.state.input1, this.state.operator, this.state.input2, typeof this.state.input2, this.state.result, this.state.display);
+        console.log(`before '=': input1 is ${this.state.input1}, its type is ${typeof this.state.input1}, operator is ${this.state.operator}, input2 is ${this.state.input2}, its type ${typeof this.state.input2}, result is ${this.state.result}, and display ${this.state.display}`);
 
         switch (this.state.operator) {
             case 'addition':
@@ -181,9 +178,26 @@ class ClassCalculator extends React.Component {
             default:
                 console.log('no operator selected');
         }
-        this.reset();
+        
         this.displayInput(this.state.result);
-        console.log(this.state.display);
+        this.reset();
+        
+        
+        console.log(`after '=': input1 is ${this.state.input1}, its type is ${typeof this.state.input1}, operator is ${this.state.operator}, input2 is ${this.state.input2}, its type ${typeof this.state.input2}, result is ${this.state.result}, and display ${this.state.display}`);
+    };
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.result !== this.state.result) {
+            this.displayInput(this.state.result);
+        };
+        if (prevState.display !== this.state.display) {
+            this.displayInput(this.state.display);
+        };
+        if (prevState.input1 !== this.state.input1) {
+            this.displayInput(this.state.input1);
+        };
+        if (prevState.input2 !== this.state.input2) {
+            this.displayInput(this.state.input2);
+        };
     };
 
     calcPercent = () => {
@@ -314,6 +328,17 @@ class ClassCalculator extends React.Component {
     
 
     render () {
+        let output = "*(^-^)*";
+        if (this.state.result === Infinity) {
+            output = "don't you ever divide by zero!";
+        } else if (this.state.result || this.state.result === 0) {
+            output = this.state.result;
+        } else if (this.state.display) {
+            output = this.state.display;
+        } else {
+            output = "*(^-^)*";
+        }
+
         return (
             <main>
                 <header>
@@ -321,7 +346,7 @@ class ClassCalculator extends React.Component {
                 </header>
 
                 <div className="calculator">
-                    <section className="display">{this.state.display ? this.state.display : "*(^-^)*"}</section>
+                    <section className="display">{output}</section>
                     <section className="keys">
                         <button className="controls" id="clear" type="button" onClick={event => this.clearDisplay()}>AC</button>
 
@@ -359,6 +384,6 @@ class ClassCalculator extends React.Component {
             </main>
         )
     }
-}
+};
 
 export default ClassCalculator;
