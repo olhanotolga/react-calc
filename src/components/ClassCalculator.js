@@ -15,33 +15,40 @@ class ClassCalculator extends React.Component {
         };
     };
 
+    resetResult = () => {
+        this.setState({
+            result: null
+        })
+    }
+
     setOperator = (event) => {
         console.log('setOperator is called', event.target.value);
         if (this.state.result) {
-            this.setState({
-                input1: this.state.result,
-                result: null,
-                operator: event.target.value
-            })
+            this.setState(prev => ({
+                input1: prev.result
+            }));
+            
+            this.resetResult();
         } else {
             if (this.state.input2) {
                 this.calculate();
-                this.setState({
-                    input1: this.state.result,
-                    result: null,
-                    operator: event.target.value
-                })
+                this.setState(prev => ({
+                    input1: prev.result,
+                    display: prev.result
+                }))
+                this.displayInput(this.state.result);
+                this.resetResult();
             } else {
-                this.setState({
-                    input1: Number(this.state.input1),
-                    operator: event.target.value
-                });
-                this.displayInput(this.state.input1)
+                this.setState(prev => ({
+                    input1: Number(prev.input1)
+                }))
+                this.displayInput(this.state.input1);
             }
         }
         this.setState({
             operator: event.target.value
         })
+        console.log(`operator is set: input1: ${this.state.input1}, type: ${typeof this.state.input1}, operator: ${this.state.operator}, input2: ${this.state.input2}, type: ${typeof this.state.input2}, result: ${this.state.result}, display: ${this.state.display}`);
     };
 
     setInput = (event) => {
@@ -63,14 +70,16 @@ class ClassCalculator extends React.Component {
             this.setState({
                 input1: value
             });
-            // this.displayInput(this.state.input1);
             console.log(this.state.input1, typeof this.state.input1);
         } else {
             if(!this.state.operator) {
-                this.setState(prev => ({input1: prev.input1.concat(value)}));
+                this.setState(prev => ({
+                    input1: prev.input1.concat(value),
+                }));
+                // this.resetResult();
                 
                 if ((this.state.input1)[0] === "0" && (this.state.input1)[1] !== ".") {
-                    this.setState(prev => ({input1: prev.input1.substr(1)}));
+                    this.setState(prev => ({ input1: prev.input1.substr(1) }));
                 }
                 this.displayInput(this.state.input1);
                 console.log(`input1 concatenated: ${this.state.input1}`);
@@ -83,13 +92,6 @@ class ClassCalculator extends React.Component {
                         input2: value
                     })
                 } else {
-                    // this.setState(prev => {
-                    //     if ((this.state.input2)[0] === "0" && (this.state.input2)[1] !== ".") {
-                    //         this.setState({
-                    //             input2: (this.state.input2).substr(1)
-                    //         })
-                    //     } 
-                    // })
                     this.setState(prev => ({ input2: prev.input2.concat(value) }));
                     if ((this.state.input2)[0] === "0" && (this.state.input2)[1] !== ".") {
                         this.setState(prev => ({input2: prev.input2.substr(1)}));
@@ -109,10 +111,10 @@ class ClassCalculator extends React.Component {
 
     clearDisplay = () => {
         this.reset();
-        this.setState({
+        this.setState( prev => ({
             result: null,
             isInput1Float: false
-        })
+        }));
         this.displayInput(0);
     };
 
@@ -130,33 +132,29 @@ class ClassCalculator extends React.Component {
             result: Number((Number(a) + Number(b)).toFixed(10))
         })
         console.log(this.state.result);
-        // return this.state.result;
     };
     
     subtract = (a, b) => {
         this.setState({
             result: Number((Number(a) - Number(b)).toFixed(10))
         })
-        // return this.state.result;
     };
     
     multiply = (a, b) => {
         this.setState({
             result: Number((Number(a) * Number(b)).toFixed(10))
         })
-        // return this.state.result;
     };
     
     divide = (a, b) => {
         this.setState({
             result: Number((Number(a) / Number(b)).toFixed(10))
         })
-        // return this.state.result;
     };
 
     calculate = () => {
         
-        console.log(`before '=': input1 is ${this.state.input1}, its type is ${typeof this.state.input1}, operator is ${this.state.operator}, input2 is ${this.state.input2}, its type ${typeof this.state.input2}, result is ${this.state.result}, and display ${this.state.display}`);
+        // console.log(`before '=': input1 is ${this.state.input1}, its type is ${typeof this.state.input1}, operator is ${this.state.operator}, input2 is ${this.state.input2}, its type ${typeof this.state.input2}, result is ${this.state.result}, and display ${this.state.display}`);
 
         switch (this.state.operator) {
             case 'addition':
@@ -178,12 +176,11 @@ class ClassCalculator extends React.Component {
             default:
                 console.log('no operator selected');
         }
-        
         this.displayInput(this.state.result);
         this.reset();
         
         
-        console.log(`after '=': input1 is ${this.state.input1}, its type is ${typeof this.state.input1}, operator is ${this.state.operator}, input2 is ${this.state.input2}, its type ${typeof this.state.input2}, result is ${this.state.result}, and display ${this.state.display}`);
+        // console.log(`after '=': input1: ${this.state.input1}, type: ${typeof this.state.input1}, operator: ${this.state.operator}, input2: ${this.state.input2}, type: ${typeof this.state.input2}, result: ${this.state.result}, display: ${this.state.display}`);
     };
     componentDidUpdate(prevProps, prevState) {
         if (prevState.result !== this.state.result) {
@@ -198,6 +195,7 @@ class ClassCalculator extends React.Component {
         if (prevState.input2 !== this.state.input2) {
             this.displayInput(this.state.input2);
         };
+        
     };
 
     calcPercent = () => {
@@ -329,7 +327,7 @@ class ClassCalculator extends React.Component {
 
     render () {
         let output = "*(^-^)*";
-        if (this.state.result === Infinity) {
+        if (this.state.result === Infinity || this.state.result === -Infinity) {
             output = "don't you ever divide by zero!";
         } else if (this.state.result || this.state.result === 0) {
             output = this.state.result;
